@@ -1,11 +1,16 @@
-import java.util.List;
-
-public class Obstacle extends Entity
+public class Blacksmith extends Entity
 {
-	public Obstacle(String name, Point position, List<Integer> imgs, int current_img)
+	public Blacksmith(String name, Point position)
 	{
-		super(name, position, imgs, current_img);
+		super(name, position);
 	}
-	
-	//ask about entity_string, and whether it even needs to be here at all
+
+	public String entityString()
+	{
+	return ("blacksmith" + " " +
+			this.getName() + " " +
+			Integer.toString(this.getPosition().getX()) + " " +
+			Integer.toString(this.getPosition().getY()));
+	}
 }
+	
