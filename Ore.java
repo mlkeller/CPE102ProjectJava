@@ -15,7 +15,7 @@ public class Ore extends Actionable
 	
 	public String entityString()
 	{
-		return ("miner" + " " + 
+		return ("ore" + " " + 
 			    this.getName() + " " +
 			    this.getPosition().getX() + " " + 
 			    this.getPosition().getY() + " " +

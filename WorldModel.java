@@ -10,7 +10,6 @@ public class WorldModel
 	private Grid background;
 	private Grid occupancy;
 	private List<Entity> entities = new LinkedList<Entity>();
-	//action_queue
 	
 	public WorldModel(int num_rows, int num_cols, Grid background, Grid occupancy, List<Entity> entities)
 	{
@@ -30,8 +29,6 @@ public class WorldModel
 	int VEIN_RATE_MIN = 8000;
 	int VEIN_RATE_MAX = 17000;
 	
-	//get_image
-	//find_nearest
 	public List<Entity> getEntities()
 	{
 		return this.entities;
@@ -43,7 +40,6 @@ public class WorldModel
 		{
 			return (Background) this.background.getCell(pt);
 		}
-		//remember to deal with null
 		return null;
 	}
 	
@@ -61,7 +57,6 @@ public class WorldModel
 		{
 			return (Entity) this.occupancy.getCell(pt);
 		}
-		//remember to deal with null
 		return null;
 	}
 	
@@ -71,6 +66,8 @@ public class WorldModel
 		if (withinBounds(pt))
 		{
 			Entity old_entity = (Entity) this.occupancy.getCell(pt);
+			this.occupancy.setCell(pt, entity);
+			this.entities.add(entity);
 		}
 	}
 	
@@ -116,7 +113,7 @@ public class WorldModel
 	
 	public boolean isOccupied(Point pt)
 	{
-		return (this.withinBounds(pt) && (this.occupancy.getCell(pt) != null)); // and self.occupancy.GetCell(pt) != None
+		return (this.withinBounds(pt) && (this.occupancy.getCell(pt) != null));
 	}
 	
 	public Point nextPosition(Point entity_pt, Point dest_pt)
@@ -140,18 +137,18 @@ public class WorldModel
 		return new_pt;
 	}
 	
-	public Point bloblNextPosition(Point entity_pt, Point dest_pt)
+	public Point blobNextPosition(Point entity_pt, Point dest_pt)
 	{
 		int horiz = MathOperations.sign(dest_pt.getX() - entity_pt.getX());
 		Point new_pt = new Point(entity_pt.getX() + horiz, entity_pt.getY());
 		
-		if ((horiz == 0 || isOccupied(new_pt))) // and is not an instance of something, fix this later
+		if (horiz == 0 || (isOccupied(new_pt))) //and if it's not an ore
 		{
 			int vert = MathOperations.sign(dest_pt.getY() - entity_pt.getY());
 			new_pt.setX(entity_pt.getX());
 			new_pt.setY(entity_pt.getY() + vert);
 			
-			if ((vert == 0 || isOccupied(new_pt))) //and is not an instance of something, fix this later
+			if (vert == 0 || (isOccupied(new_pt))) //and if it's not an ore
 			{
 				new_pt.setX(entity_pt.getX());
 				new_pt.setY(entity_pt.getY());
@@ -163,10 +160,10 @@ public class WorldModel
 	
 	public Point findOpenAround(Point pt, int distance)
 	{
-		Point new_pt = new Point(pt.getX(), pt.getY());  //ask if I can get rid of the second part
-		for (int dy = -distance; dy <= distance; distance++)
+		Point new_pt = new Point(pt.getX(), pt.getY());  //maybe get rid of second part
+		for (int dy = -distance; dy <= distance; dy++)
 		{
-			for (int dx = -distance; dx <= distance; distance++)
+			for (int dx = -distance; dx <= distance; dx++)
 			{
 				new_pt.setX(pt.getX() + dx);
 				new_pt.setY(pt.getY() + dy);

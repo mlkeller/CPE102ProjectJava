@@ -1,4 +1,4 @@
-public class WorldObject
+public abstract class WorldObject
 {
 	String name;
 	

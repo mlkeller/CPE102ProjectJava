@@ -2,13 +2,14 @@ public class Grid
 {
 	private int width;
 	private int height;
-	WorldObject[][] cells = new WorldObject[width][height];
+	WorldObject[][] cells;
 	
 	public Grid(int width, int height, WorldObject occupancy_value)
 	{
 		this.width = width;
 		this.height = height;
-		
+		this.cells = new WorldObject[height][width];
+
 		for (int row = 0; row < height; row++)
 		{
 			for (int col = 0; col < width; col++)
@@ -16,6 +17,16 @@ public class Grid
 				this.cells[row][col] = occupancy_value;
 			}
 		}
+	}
+
+	public int getWidth()
+	{
+		return this.width;
+	}
+
+	public int getHeight()
+	{
+		return this.height;
 	}
 	
 	public WorldObject getCell(Point pt)

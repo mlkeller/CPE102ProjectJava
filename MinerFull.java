@@ -7,7 +7,7 @@ public class MinerFull extends Miner
 		super(name, position, animation_rate, rate, resource_limit, resource_limit);
 	}
 	
-	public MinerNotFull tryTransformMinerFull(WorldModel world)
+	public MinerNotFull tryTransformMinerFull()
 	{
 		MinerNotFull new_entity = new MinerNotFull(this.getName(), this.getPosition(),
 												   this.getAnimationRate(), this.getRate(), this.getResourceLimit());
