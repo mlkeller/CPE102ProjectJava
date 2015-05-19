@@ -62,9 +62,13 @@ public class Drawer extends PApplet
 			//draw background
 			for (int y = 0; y < view.getViewport().getHeight(); y++)
 			{
+				System.out.println("viewportheight: " + view.getViewport().getHeight());
 				for (int x = 0; x < view.getViewport().getWidth(); x++)
 				{
-					Point w_pt = view.viewportToWorld(new Point(x, y));
+					//Point w_pt = view.viewportToWorld(new Point(x, y));
+					//System.out.println(w_pt.getX() + " " + w_pt.getY());
+					Point w_pt = new Point(x + view.getViewport().getLeft(),
+										   y + view.getViewport().getTop());
 					PImage img = world.getBackgroundImage(w_pt);
 					image(img, x*view.getTileWidth(), y*view.getTileHeight());
 					System.out.println("here");
@@ -88,20 +92,31 @@ public class Drawer extends PApplet
 	{
 		switch (key)
 		{
+			case 'w':
+				if (view.getViewport().getTop() > 0)
+				{
+					view.updateView(0, -1);
+				}
+				break;
 			case 'a':
 				if (view.getViewport().getLeft() > 0)
 				{
-					System.out.println("aa");
 					view.updateView(-1, 0);
 				}
 				break;
-			case 'd':
-				if (view.getViewport().getLeft() + view.getViewport().getWidth() < SCREEN_WIDTH)
+			case 's':
+				if (view.getViewport().getTop() + view.getViewport().getHeight() < SCREEN_HEIGHT/TILE_HEIGHT*WORLD_HEIGHT_SCALE)
 				{
-					System.out.println("dd");
+					view.updateView(0, 1);
+				}
+				break;
+			case 'd':
+				if (view.getViewport().getLeft() + view.getViewport().getWidth() < SCREEN_WIDTH/TILE_WIDTH*WORLD_WIDTH_SCALE)
+				{
 					view.updateView(1, 0);
 				}
 				break;
+
 		}
 	}
 }

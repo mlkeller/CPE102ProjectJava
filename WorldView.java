@@ -38,6 +38,8 @@ public class WorldView
 		this.world = world;
 		this.tile_width = tile_width;
 		this.tile_height = tile_height;
+		this.num_rows = view_rows;
+		this.num_cols = view_cols;
 	}
 	
 	public WorldModel getWorld()
@@ -67,9 +69,10 @@ public class WorldView
 	
 	public Point viewportToWorld(Point pt)
 	{
-		System.out.println("aha" + pt.getX() + " " + this.viewport.getLeft());
+		//System.out.println("ahax" + pt.getX() + " " + this.viewport.getLeft());
+		//System.out.println("ahay" + pt.getY() + " " + this.viewport.getTop());
 		Point rm_pt = new Point(pt.getX() + this.viewport.getLeft(), pt.getY() + this.viewport.getTop());
-		//System.out.println(rm_pt.getX() + " " + rm_pt.getY());
+		//System.out.println("oho" + rm_pt.getX() + " " + rm_pt.getY());
 		return rm_pt;
 	}
 	
@@ -81,34 +84,27 @@ public class WorldView
 	public Rectangle createShiftedViewport(int deltax, int deltay, int num_rows, int num_cols)
 	{
 		int new_x = this.clamp(this.viewport.getLeft() + deltax, 0, num_cols - this.viewport.getWidth());
+		System.out.println("x " + new_x);
+		System.out.println(this.viewport.getLeft());
+		System.out.println(deltax);
+		System.out.println(num_cols);
+		System.out.println(this.viewport.getWidth());
 		int new_y = this.clamp(this.viewport.getTop() + deltay, 0, num_rows - this.viewport.getHeight());
+		System.out.println("y " + new_y);
 		return new Rectangle(new_x, new_y, this.viewport.getWidth(), this.viewport.getHeight());
 	}
 	
 	public void updateView(int deltax, int deltay)
 	{
-		this.viewport = this.createShiftedViewport(deltax, deltay, this.num_rows, this.num_cols);
+		this.viewport = new Rectangle(this.viewport.getLeft() + deltax,
+									  this.viewport.getTop() + deltay,
+									  this.viewport.getWidth(),
+									  this.viewport.getHeight());
 	}
-	public void updateView()
+	/*public void updateView()
 	{
 		int deltax = 0;
 		int deltay = 0;
 		this.viewport = this.createShiftedViewport(deltax, deltay, this.num_rows, this.num_cols);
-	}
-	
-	/*
-	public void updateViewTiles(List<Point> tiles)
-	{
-		List<Point> rects = new ArrayList<Point>();
-		for (Point tile : tiles)
-		{
-			if (this.viewport.pointInRectangle(tile))
-			{
-				Point v_pt = this.worldToViewport(tile);
-				PImage img = this.getTileImage(v_pt);
-				rects.add(this.updateTile(v_pt, img));
-			}
-		}
-	}
-	*/
+	}*/
 }
