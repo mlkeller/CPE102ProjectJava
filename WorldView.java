@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -6,7 +7,7 @@ import java.util.Random;
 import processing.core.*;
 
 
-public class WorldView extends PApplet
+public class WorldView
 {
 	public static final String IMAGE_LIST_FILE_NAME = "imagelist";
 	public static final String WORLD_FILE = "gaia.sav";
@@ -20,12 +21,10 @@ public class WorldView extends PApplet
 	public static final int TILE_HEIGHT = 32;
 
 	long next_time;
-	public boolean setup_complete = false;
 
 	private Point mouse_pt;
 	private Rectangle viewport;
 	private WorldModel world;
-	private WorldView view;
 	
 	private int tile_width;
 	private int tile_height;
@@ -40,9 +39,25 @@ public class WorldView extends PApplet
 		this.tile_width = tile_width;
 		this.tile_height = tile_height;
 	}
-	public WorldView()
+	
+	public WorldModel getWorld()
 	{
-		
+		return this.world;
+	}
+	
+	public Rectangle getViewport()
+	{
+		return this.viewport;
+	}
+	
+	public int getTileWidth()
+	{
+		return this.tile_width;
+	}
+	
+	public int getTileHeight()
+	{
+		return this.tile_height;
 	}
 	
 	public int clamp(int v, int low, int high)
@@ -52,51 +67,27 @@ public class WorldView extends PApplet
 	
 	public Point viewportToWorld(Point pt)
 	{
-		return new Point(pt.getX() + this.viewport.getLeft(), pt.getY() + this.viewport.getTop());
+		System.out.println("aha" + pt.getX() + " " + this.viewport.getLeft());
+		Point rm_pt = new Point(pt.getX() + this.viewport.getLeft(), pt.getY() + this.viewport.getTop());
+		//System.out.println(rm_pt.getX() + " " + rm_pt.getY());
+		return rm_pt;
 	}
 	
 	public Point worldToViewport(Point pt)
 	{
-		return new Point(pt.getX() - view.viewport.getLeft(), pt.getY() - view.viewport.getTop());
+		return new Point(pt.getX() - this.viewport.getLeft(), pt.getY() - this.viewport.getTop());
 	}
 	
 	public Rectangle createShiftedViewport(int deltax, int deltay, int num_rows, int num_cols)
 	{
-		System.out.println(view);
-		int new_x = view.clamp(view.viewport.getLeft() + deltax, 0, num_cols - view.viewport.getWidth());
-		int new_y = view.clamp(view.viewport.getTop() + deltay, 0, num_rows - view.viewport.getHeight());
-		return new Rectangle(new_x, new_y, view.viewport.getWidth(), view.viewport.getHeight());
-	}
-	
-	
-	public void setup()
-	{
-		int num_cols = SCREEN_WIDTH / TILE_WIDTH * WORLD_WIDTH_SCALE;
-		int num_rows = SCREEN_HEIGHT / TILE_HEIGHT * WORLD_HEIGHT_SCALE;
-		
-		Map<String, List<PImage>> i_store = ImageStore.loadImages(this, IMAGE_LIST_FILE_NAME, TILE_WIDTH, TILE_HEIGHT);
-		Background default_background = SaveLoad.createDefaultBackground(ImageStore.getImages(i_store, ImageStore.DEFAULT_IMAGE_NAME));
-
-		world = new WorldModel(num_rows, num_cols, default_background);
-		view = new WorldView(SCREEN_WIDTH/TILE_WIDTH, SCREEN_HEIGHT/TILE_HEIGHT, world, TILE_WIDTH, TILE_HEIGHT);
-		SaveLoad.loadWorld(world, i_store, new File(WORLD_FILE));
-		
-		size(SCREEN_WIDTH, SCREEN_HEIGHT);
-		background(0);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		next_time = System.currentTimeMillis() + 100;
-		setup_complete = true;
-		//Controller.activityLoop(view, world);
+		int new_x = this.clamp(this.viewport.getLeft() + deltax, 0, num_cols - this.viewport.getWidth());
+		int new_y = this.clamp(this.viewport.getTop() + deltay, 0, num_rows - this.viewport.getHeight());
+		return new Rectangle(new_x, new_y, this.viewport.getWidth(), this.viewport.getHeight());
 	}
 	
 	public void updateView(int deltax, int deltay)
 	{
-		
+		this.viewport = this.createShiftedViewport(deltax, deltay, this.num_rows, this.num_cols);
 	}
 	public void updateView()
 	{
@@ -105,48 +96,19 @@ public class WorldView extends PApplet
 		this.viewport = this.createShiftedViewport(deltax, deltay, this.num_rows, this.num_cols);
 	}
 	
-	public void draw()
+	/*
+	public void updateViewTiles(List<Point> tiles)
 	{
-		System.out.println(world.getActionQueue().getSize());
-		if (setup_complete)
+		List<Point> rects = new ArrayList<Point>();
+		for (Point tile : tiles)
 		{
-			long time = System.currentTimeMillis();
-			System.out.println(time);
-			if (time >= next_time)
+			if (this.viewport.pointInRectangle(tile))
 			{
-				world.updateOnTime(time);
-				//draw background
-				for (int y = 0; y < view.viewport.getHeight(); y++)
-				{
-					for (int x = 0; x < view.viewport.getWidth(); x++)
-					{
-						Point w_pt = view.viewportToWorld(new Point(x, y));
-						PImage img = view.world.getBackgroundImage(w_pt);
-						image(img, x*view.tile_width, y*view.tile_height);
-					}
-				}
-				//draw entities
-				for (Entity e : view.world.getEntities())
-				{
-					if (view.viewport.pointInRectangle(e.getPosition()))
-					{
-						Point v_pt = this.worldToViewport(e.getPosition());
-						image(e.getImage(), v_pt.getX() * view.tile_width, v_pt.getY() * view.tile_height);
-					}
-				}
-				next_time = time + 100;
+				Point v_pt = this.worldToViewport(tile);
+				PImage img = this.getTileImage(v_pt);
+				rects.add(this.updateTile(v_pt, img));
 			}
 		}
 	}
-	
-	public void keyPressed()
-	{
-		
-	}
-	
-	public static void main(String[] args)
-	{
-		Random random_generator = new Random();
-		PApplet.main("WorldView");
-	}
+	*/
 }

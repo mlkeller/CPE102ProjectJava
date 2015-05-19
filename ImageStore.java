@@ -18,7 +18,7 @@ public abstract class ImageStore
 	
  //create_default_image - we may have to add this back in later
 	
-	public static Map<String, List<PImage>> loadImages(WorldView view, String filename, int tile_width, int tile_height)
+	public static Map<String, List<PImage>> loadImages(PApplet papp, String filename, int tile_width, int tile_height)
 	{
 		Map<String, List<PImage>> images = new HashMap<String, List<PImage>>();
 		try
@@ -26,26 +26,26 @@ public abstract class ImageStore
 			Scanner in = new Scanner(new FileInputStream(new File("imagelist.txt")));
 			while(in.hasNextLine())
 			{
-				processImageLine(view, images, in.nextLine());
+				processImageLine(papp, images, in.nextLine());
 			}
 			in.close();
 		}
 		catch (FileNotFoundException e)
 		{
 			System.out.println("File imagelist.txt may be missing.\n\n" + e);
-			System.exit(0);
+			//System.exit(0);
 		}
 		return images;
 	}
 	
-	public static void processImageLine(WorldView view, Map<String, List<PImage>> images, String line)
+	public static void processImageLine(PApplet papp, Map<String, List<PImage>> images, String line)
 	{
 		String[] attrs = line.split("\\s");
 		if (attrs.length >= 2)
 		{
 			String key = attrs[0];
 
-			PImage img = view.loadImage(attrs[1]);
+			PImage img = papp.loadImage(attrs[1]);
 					
 			List<PImage> imgs = getImagesInternal(images, key);
 			imgs = getImagesInternal(images, key);
