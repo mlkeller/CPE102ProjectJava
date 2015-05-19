@@ -17,7 +17,9 @@ public class WorldView extends PApplet
 	public static final int SCREEN_HEIGHT = 480;
 	public static final int TILE_WIDTH = 32;
 	public static final int TILE_HEIGHT = 32;
-	
+
+	public boolean setup_complete = false;
+
 	private Point mouse_pt;
 	private Rectangle viewport;
 	private WorldModel world;
@@ -26,12 +28,17 @@ public class WorldView extends PApplet
 	private int num_rows;
 	private int num_cols;
 	
+	
 	public WorldView(int view_cols, int view_rows, WorldModel world, int tile_width, int tile_height)
 	{
 		this.viewport = new Rectangle(0, 0, view_cols, view_rows);
 		this.world = world;
 		this.tile_width = tile_width;
 		this.tile_height = tile_height;
+	}
+	public WorldView()
+	{
+		
 	}
 	
 	public int clamp(int v, int low, int high)
@@ -71,30 +78,37 @@ public class WorldView extends PApplet
 		
 		size(SCREEN_WIDTH, SCREEN_HEIGHT);
 		background(0);
-
-		Controller.activityLoop(view, world);
+		
+		setup_complete = true;
+		//Controller.activityLoop(view, world);
 	}
 	
 	public void draw()
 	{
-		//draw background
-		for (int y = 0; y < this.viewport.getHeight(); y++)
+		if (setup_complete)
 		{
-			for (int x = 0; x < this.viewport.getWidth(); x++)
-			{
-				Point w_pt = this.viewportToWorld(new Point(x, y));
-				PImage img = this.world.getBackgroundImage(w_pt);
-				image(img, x*this.tile_width, y*this.tile_height);
-			}
-		}
+			long time = System.currentTimeMillis();
+			//if (time >= next_time)
 		
-		//draw entities
-		for (Entity e : this.world.getEntities())
-		{
-			if (this.viewport.pointInRectangle(e.getPosition()))
+			//draw background
+			for (int y = 0; y < this.viewport.getHeight(); y++)
 			{
-				Point v_pt = this.worldToViewport(e.getPosition());
-				image(e.getImage(), v_pt.getX() * this.tile_width, v_pt.getY() * this.tile_height);
+				for (int x = 0; x < this.viewport.getWidth(); x++)
+				{
+					Point w_pt = this.viewportToWorld(new Point(x, y));
+					PImage img = this.world.getBackgroundImage(w_pt);
+					image(img, x*this.tile_width, y*this.tile_height);
+				}
+			}
+			
+			//draw entities
+			for (Entity e : this.world.getEntities())
+			{
+				if (this.viewport.pointInRectangle(e.getPosition()))
+				{
+					Point v_pt = this.worldToViewport(e.getPosition());
+					image(e.getImage(), v_pt.getX() * this.tile_width, v_pt.getY() * this.tile_height);
+				}
 			}
 		}
 	}
