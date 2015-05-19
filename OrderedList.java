@@ -6,6 +6,10 @@ public class OrderedList
 {
 	private List<OrderedListItem> list = new LinkedList<OrderedListItem>();
 	
+	public int getSize()
+	{
+		return list.size();
+	}
 	
 	public void insert(Action action, long ord)
 	{
@@ -34,11 +38,11 @@ public class OrderedList
 		}
 	}
 	
-	public Action head()
+	public OrderedListItem head()
 	{
 		if (!(this.list.isEmpty()))
 		{
-			return this.list.get(0).getAction();
+			return this.list.get(0);
 		}
 		else
 		{

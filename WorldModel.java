@@ -21,7 +21,7 @@ public class WorldModel
 	private Grid background;
 	private Grid occupancy;
 	private List<Entity> entities = new LinkedList<Entity>();
-	private OrderedList action_queue;
+	private OrderedList action_queue = new OrderedList();
 	
 	public WorldModel(int num_rows, int num_cols, Background background)
 	{
@@ -29,6 +29,11 @@ public class WorldModel
 		this.num_cols = num_cols;
 		this.background = new Grid(num_cols, num_rows, background);
 		this.occupancy = new Grid(num_cols, num_rows, null);
+	}
+	
+	public OrderedList getActionQueue()
+	{
+		return this.action_queue;
 	}
 	
 	public List<Entity> getEntities()
@@ -162,12 +167,23 @@ public class WorldModel
 	
 	public void scheduleAction(Action action, long time)
 	{
-		this.action_queue.insert(action, time);
+		this.action_queue.insert(action, time);  // + System.currentTimeMillis() + 
 	}
 	
 	public void unscheduleAction(Action action)
 	{
 		this.action_queue.remove(action);
+	}
+	
+	public void updateOnTime(long ticks)
+	{
+		OrderedListItem next = this.action_queue.head();
+		while ((next != null) && (next.getTime() < ticks))
+		{
+			this.action_queue.pop();
+			next.getAction().execute(ticks);
+			next = this.action_queue.head();
+		}
 	}
 	
 	public void clearPendingActions(Actionable entity)
@@ -243,9 +259,9 @@ public class WorldModel
 		return null;
 	}
 	
-	public Actionable nearestEntity(List<EntityDistancePair> entity_dists)
+	public Entity nearestEntity(List<EntityDistancePair> entity_dists)
 	{
-		Actionable nearest;
+		Entity nearest;
 		if (entity_dists.size() > 0)
 		{
 			EntityDistancePair shortest_pair = entity_dists.get(0);
@@ -268,14 +284,14 @@ public class WorldModel
 		return nearest;
 	}
 	
-	public Actionable findNearest(Point pt, Class type)
+	public Entity findNearest(Point pt, Class type)
 	{
 		List<EntityDistancePair> oftype = new LinkedList<EntityDistancePair>();
 		for (Entity e : this.entities)
 		{
 			if (type.isInstance(e))
 			{
-				EntityDistancePair new_pair = new EntityDistancePair((Actionable)e, MathOperations.distanceSquared(pt, e.getPosition()));
+				EntityDistancePair new_pair = new EntityDistancePair(e, MathOperations.distanceSquared(pt, e.getPosition()));
 				oftype.add(new_pair);
 			}
 		}

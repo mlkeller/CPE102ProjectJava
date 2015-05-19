@@ -1,6 +1,9 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
 import processing.core.*;
 
 public abstract class SaveLoad
@@ -54,19 +57,28 @@ public abstract class SaveLoad
 	
 	//there's no saving functionality
 	
-	public static void loadWorld(WorldModel world,  Map<String, List<PImage>> i_store, String filename)
+	public static void loadWorld(WorldModel world,  Map<String, List<PImage>> i_store, File filename)
 	{
-		Scanner file = new Scanner(filename);
-		SaveLoad.loadWorldInternal(world, i_store, file, true);
-		file.close();
-	} //moved from main
+		System.out.println("loading the world");
+		Scanner file;
+		try
+		{
+			file = new Scanner(filename);
+			SaveLoad.loadWorldInternal(world, i_store, file, true);
+			file.close();
+		} 
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
 	public static void loadWorldInternal(WorldModel world, Map<String, List<PImage>> images, Scanner file, Boolean run) //run default false
 	{
-		if (file.hasNextLine())
+		while (file.hasNextLine())
 		{
 			String[] properties = file.nextLine().split("\\s"); //look at this in python again later
-			if (properties[PROPERTY_KEY] == BGND_KEY)
+			if (properties[PROPERTY_KEY].equals(BGND_KEY))
 			{
 				SaveLoad.addBackground(world, properties, images);
 			}
@@ -105,7 +117,7 @@ public abstract class SaveLoad
 	public static Entity createFromProperties(String[] properties, Map<String, List<PImage>> i_store, WorldModel world, boolean run)
 	{
 		String key = properties[PROPERTY_KEY];
-		if (key == MINER_KEY)
+		if (key.equals(MINER_KEY))
 		{
 			MinerNotFull new_miner = createMiner(properties, i_store);
 			if (run)
@@ -114,7 +126,7 @@ public abstract class SaveLoad
 			}
 			return new_miner;
 		}
-		else if (key == VEIN_KEY)
+		else if (key.equals(VEIN_KEY))
 		{
 			Vein new_vein = createVein(properties, i_store);
 			if (run)
@@ -123,7 +135,7 @@ public abstract class SaveLoad
 			}
 			return new_vein;
 		}
-		else if (key == ORE_KEY)
+		else if (key.equals(ORE_KEY))
 		{
 			Ore new_ore = createOre(properties, i_store);
 			if (run)
@@ -132,11 +144,11 @@ public abstract class SaveLoad
 			}
 			return new_ore;
 		}
-		else if (key == SMITH_KEY)
+		else if (key.equals(SMITH_KEY))
 		{
 			return createBlacksmith(properties, i_store);
 		}
-		else if (key == OBSTACLE_KEY)
+		else if (key.equals(OBSTACLE_KEY))
 		{
 			return createObstacle(properties, i_store);
 		}

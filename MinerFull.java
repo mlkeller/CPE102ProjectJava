@@ -27,7 +27,7 @@ public class MinerFull extends Miner
 			this.removePendingAction(a[0]);
 			
 			Point entity_pt = this.getPosition();
-			Actionable smith = world.findNearest(entity_pt, Blacksmith.class);
+			Entity smith = world.findNearest(entity_pt, Blacksmith.class);
 			PointBooleanPair tiles_and_found = this.minerToSmith(world, smith);
 			
 			Miner new_entity = this;
@@ -48,7 +48,7 @@ public class MinerFull extends Miner
 		return a[0];
 	}
 	
-	public PointBooleanPair minerToSmith(WorldModel world, Actionable smith)
+	public PointBooleanPair minerToSmith(WorldModel world, Entity smith)
 	{
 		List<Point> return_pts = new ArrayList<Point>();
 		Point entity_pt = this.getPosition();

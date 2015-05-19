@@ -1,6 +1,7 @@
 import java.util.List;
 import processing.core.*;
 
+
 public abstract class Entity extends WorldObject
 {
 	private Point position;

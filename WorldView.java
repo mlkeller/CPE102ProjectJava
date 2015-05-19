@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -18,11 +19,14 @@ public class WorldView extends PApplet
 	public static final int TILE_WIDTH = 32;
 	public static final int TILE_HEIGHT = 32;
 
+	long next_time;
 	public boolean setup_complete = false;
 
 	private Point mouse_pt;
 	private Rectangle viewport;
 	private WorldModel world;
+	private WorldView view;
+	
 	private int tile_width;
 	private int tile_height;
 	private int num_rows;
@@ -53,14 +57,15 @@ public class WorldView extends PApplet
 	
 	public Point worldToViewport(Point pt)
 	{
-		return new Point(pt.getX() - this.viewport.getLeft(), pt.getY() - this.viewport.getTop());
+		return new Point(pt.getX() - view.viewport.getLeft(), pt.getY() - view.viewport.getTop());
 	}
 	
 	public Rectangle createShiftedViewport(int deltax, int deltay, int num_rows, int num_cols)
 	{
-		int new_x = this.clamp(this.viewport.getLeft() + deltax, 0, num_cols - this.viewport.getWidth());
-		int new_y = this.clamp(this.viewport.getTop() + deltay, 0, num_rows - this.viewport.getHeight());
-		return new Rectangle(new_x, new_y, this.viewport.getWidth(), this.viewport.getHeight());
+		System.out.println(view);
+		int new_x = view.clamp(view.viewport.getLeft() + deltax, 0, num_cols - view.viewport.getWidth());
+		int new_y = view.clamp(view.viewport.getTop() + deltay, 0, num_rows - view.viewport.getHeight());
+		return new Rectangle(new_x, new_y, view.viewport.getWidth(), view.viewport.getHeight());
 	}
 	
 	
@@ -72,43 +77,64 @@ public class WorldView extends PApplet
 		Map<String, List<PImage>> i_store = ImageStore.loadImages(this, IMAGE_LIST_FILE_NAME, TILE_WIDTH, TILE_HEIGHT);
 		Background default_background = SaveLoad.createDefaultBackground(ImageStore.getImages(i_store, ImageStore.DEFAULT_IMAGE_NAME));
 
-		WorldModel world = new WorldModel(num_rows, num_cols, default_background);
-		WorldView view = new WorldView(SCREEN_WIDTH/TILE_WIDTH, SCREEN_HEIGHT/TILE_HEIGHT, world, TILE_WIDTH, TILE_HEIGHT);
-		SaveLoad.loadWorld(world, i_store, WORLD_FILE);
+		world = new WorldModel(num_rows, num_cols, default_background);
+		view = new WorldView(SCREEN_WIDTH/TILE_WIDTH, SCREEN_HEIGHT/TILE_HEIGHT, world, TILE_WIDTH, TILE_HEIGHT);
+		SaveLoad.loadWorld(world, i_store, new File(WORLD_FILE));
 		
 		size(SCREEN_WIDTH, SCREEN_HEIGHT);
 		background(0);
-		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		next_time = System.currentTimeMillis() + 100;
 		setup_complete = true;
 		//Controller.activityLoop(view, world);
 	}
 	
+	public void updateView(int deltax, int deltay)
+	{
+		
+	}
+	public void updateView()
+	{
+		int deltax = 0;
+		int deltay = 0;
+		this.viewport = this.createShiftedViewport(deltax, deltay, this.num_rows, this.num_cols);
+	}
+	
 	public void draw()
 	{
+		System.out.println(world.getActionQueue().getSize());
 		if (setup_complete)
 		{
 			long time = System.currentTimeMillis();
-			//if (time >= next_time)
-		
-			//draw background
-			for (int y = 0; y < this.viewport.getHeight(); y++)
+			System.out.println(time);
+			if (time >= next_time)
 			{
-				for (int x = 0; x < this.viewport.getWidth(); x++)
+				world.updateOnTime(time);
+				//draw background
+				for (int y = 0; y < view.viewport.getHeight(); y++)
 				{
-					Point w_pt = this.viewportToWorld(new Point(x, y));
-					PImage img = this.world.getBackgroundImage(w_pt);
-					image(img, x*this.tile_width, y*this.tile_height);
+					for (int x = 0; x < view.viewport.getWidth(); x++)
+					{
+						Point w_pt = view.viewportToWorld(new Point(x, y));
+						PImage img = view.world.getBackgroundImage(w_pt);
+						image(img, x*view.tile_width, y*view.tile_height);
+					}
 				}
-			}
-			
-			//draw entities
-			for (Entity e : this.world.getEntities())
-			{
-				if (this.viewport.pointInRectangle(e.getPosition()))
+				//draw entities
+				for (Entity e : view.world.getEntities())
 				{
-					Point v_pt = this.worldToViewport(e.getPosition());
-					image(e.getImage(), v_pt.getX() * this.tile_width, v_pt.getY() * this.tile_height);
+					if (view.viewport.pointInRectangle(e.getPosition()))
+					{
+						Point v_pt = this.worldToViewport(e.getPosition());
+						image(e.getImage(), v_pt.getX() * view.tile_width, v_pt.getY() * view.tile_height);
+					}
 				}
+				next_time = time + 100;
 			}
 		}
 	}

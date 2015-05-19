@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
-import processing.core.*;
 
+import processing.core.*;
 
 public abstract class AnimatedActor extends Actionable
 {
@@ -35,7 +35,7 @@ public abstract class AnimatedActor extends Actionable
 			if (repeat_count != 1)
 			{
 				this.scheduleAction(world, this.createAnimationAction(world, Math.max(repeat_count - 1, 0)),
-									current_ticks + this.getAnimationRate());
+						 		    current_ticks + this.getAnimationRate());
 				return_pts.add(this.getPosition());
 			}
 			return return_pts;

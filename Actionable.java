@@ -2,7 +2,6 @@ import java.util.LinkedList;
 import java.util.List;
 import processing.core.*;
 
-
 public abstract class Actionable extends Entity
 {
 	private List<Action> pending_actions = new LinkedList<Action>();
