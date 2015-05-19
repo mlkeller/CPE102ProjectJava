@@ -1,25 +1,12 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import processing.core.*;
 
 public class WorldModel
 {
-	private int num_rows;
-	private int num_cols;
-	private Grid background;
-	private Grid occupancy;
-	private List<Entity> entities = new LinkedList<Entity>();
-	
-	public WorldModel(int num_rows, int num_cols, Grid background, Grid occupancy, List<Entity> entities)
-	{
-		this.num_rows = num_rows;
-		this.num_cols = num_cols;
-		this.background = background;
-		this.occupancy = occupancy;
-		this.entities = entities;
-	}
-
 	Random random_generator = new Random();
 	int BLOB_ANIMATION_MIN = 1;
 	int BLOB_ANIMATION_MAX = 3;
@@ -29,9 +16,61 @@ public class WorldModel
 	int VEIN_RATE_MIN = 8000;
 	int VEIN_RATE_MAX = 17000;
 	
+	private int num_rows;
+	private int num_cols;
+	private Grid background;
+	private Grid occupancy;
+	private List<Entity> entities = new LinkedList<Entity>();
+	private OrderedList action_queue;
+	
+	public WorldModel(int num_rows, int num_cols, Background background)
+	{
+		this.num_rows = num_rows;
+		this.num_cols = num_cols;
+		this.background = new Grid(num_cols, num_rows, background);
+		this.occupancy = new Grid(num_cols, num_rows, null);
+	}
+	
 	public List<Entity> getEntities()
 	{
 		return this.entities;
+	}
+	
+	public PImage getBackgroundImage(Point pt)
+	{
+		if (this.withinBounds(pt))
+		{
+			return this.getImage(pt);
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	public PImage getImage(Point pt)
+	{
+		return this.background.getCell(pt).getImage();
+	}
+	
+	public Background getBackground(Point pt)
+	{
+		if (this.withinBounds(pt))
+		{
+			return (Background)this.background.getCell(pt);
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	public void setBackground(Point pt, Background bgnd)
+	{
+		if (this.withinBounds(pt))
+		{
+			this.background.setCell(pt, bgnd);
+		}
 	}
 	
 	public Background getTileBackground(Point pt)
@@ -40,6 +79,7 @@ public class WorldModel
 		{
 			return (Background) this.background.getCell(pt);
 		}
+		//remember to deal with null
 		return null;
 	}
 	
@@ -57,15 +97,20 @@ public class WorldModel
 		{
 			return (Entity) this.occupancy.getCell(pt);
 		}
+		//remember to deal with null
 		return null;
 	}
 	
 	public void addEntity(Entity entity)
 	{
 		Point pt = entity.getPosition();
-		if (withinBounds(pt))
+		if (this.withinBounds(pt))
 		{
 			Entity old_entity = (Entity) this.occupancy.getCell(pt);
+			if (old_entity != null)
+			{
+				((Actionable)old_entity).clearPendingActions();  //it may crash and burn here
+			}
 			this.occupancy.setCell(pt, entity);
 			this.entities.add(entity);
 		}
@@ -74,7 +119,7 @@ public class WorldModel
 	public List<Point> moveEntity(Entity entity, Point new_pt)
 	{
 		List<Point> tiles = new ArrayList<Point>();
-		if (withinBounds(new_pt))
+		if (this.withinBounds(new_pt))
 		{
 			Point old_pt = entity.getPosition();
 			this.occupancy.setCell(old_pt, null);
@@ -83,7 +128,6 @@ public class WorldModel
 			tiles.add(new_pt);
 			entity.setPosition(new_pt);
 		}
-		
 		return tiles;
 	}
 	
@@ -95,7 +139,7 @@ public class WorldModel
 	public void removeEntityAt(Point pt)
 	{
 		//isOccupied - change to later
-		if ((withinBounds(pt)) && (this.occupancy.getCell(pt) != null))
+		if ((this.withinBounds(pt)) && (this.occupancy.getCell(pt) != null))
 		{
 			Entity entity = (Entity) this.occupancy.getCell(pt);
 			Point new_position = new Point(-1, -1);
@@ -115,6 +159,27 @@ public class WorldModel
 	{
 		return (this.withinBounds(pt) && (this.occupancy.getCell(pt) != null));
 	}
+	
+	public void scheduleAction(Action action, long time)
+	{
+		this.action_queue.insert(action, time);
+	}
+	
+	public void unscheduleAction(Action action)
+	{
+		this.action_queue.remove(action);
+	}
+	
+	public void clearPendingActions(Actionable entity)
+	{
+		for (Action a : entity.getPendingActions())
+		{
+			this.unscheduleAction(a);
+		}
+		entity.clearPendingActions();
+	}
+	
+	//update on time goes in draw
 	
 	public Point nextPosition(Point entity_pt, Point dest_pt)
 	{
@@ -142,13 +207,13 @@ public class WorldModel
 		int horiz = MathOperations.sign(dest_pt.getX() - entity_pt.getX());
 		Point new_pt = new Point(entity_pt.getX() + horiz, entity_pt.getY());
 		
-		if (horiz == 0 || (isOccupied(new_pt))) //and if it's not an ore
+		if ((horiz == 0 || isOccupied(new_pt))) // and is not an instance of something, fix this later
 		{
 			int vert = MathOperations.sign(dest_pt.getY() - entity_pt.getY());
 			new_pt.setX(entity_pt.getX());
 			new_pt.setY(entity_pt.getY() + vert);
 			
-			if (vert == 0 || (isOccupied(new_pt))) //and if it's not an ore
+			if ((vert == 0 || isOccupied(new_pt))) //and is not an instance of something, fix this later
 			{
 				new_pt.setX(entity_pt.getX());
 				new_pt.setY(entity_pt.getY());
@@ -160,10 +225,10 @@ public class WorldModel
 	
 	public Point findOpenAround(Point pt, int distance)
 	{
-		Point new_pt = new Point(pt.getX(), pt.getY());  //maybe get rid of second part
-		for (int dy = -distance; dy <= distance; dy++)
+		Point new_pt = new Point(pt.getX(), pt.getY());  //ask if I can get rid of the second part
+		for (int dy = -distance; dy <= distance; distance++)
 		{
-			for (int dx = -distance; dx <= distance; dx++)
+			for (int dx = -distance; dx <= distance; distance++)
 			{
 				new_pt.setX(pt.getX() + dx);
 				new_pt.setY(pt.getY() + dy);
@@ -178,9 +243,9 @@ public class WorldModel
 		return null;
 	}
 	
-	public Entity nearestEntity(List<EntityDistancePair> entity_dists)
+	public Actionable nearestEntity(List<EntityDistancePair> entity_dists)
 	{
-		Entity nearest;
+		Actionable nearest;
 		if (entity_dists.size() > 0)
 		{
 			EntityDistancePair shortest_pair = entity_dists.get(0);
@@ -203,14 +268,14 @@ public class WorldModel
 		return nearest;
 	}
 	
-	public Entity findNearest(Point pt, Class type)
+	public Actionable findNearest(Point pt, Class type)
 	{
 		List<EntityDistancePair> oftype = new LinkedList<EntityDistancePair>();
 		for (Entity e : this.entities)
 		{
 			if (type.isInstance(e))
 			{
-				EntityDistancePair new_pair = new EntityDistancePair(e, MathOperations.distanceSquared(pt, e.getPosition()));
+				EntityDistancePair new_pair = new EntityDistancePair((Actionable)e, MathOperations.distanceSquared(pt, e.getPosition()));
 				oftype.add(new_pair);
 			}
 		}
@@ -218,33 +283,33 @@ public class WorldModel
 		return nearestEntity(oftype);
 	}
 	
-	public OreBlob createBlob(String name, Point pt, int rate)
+	public OreBlob createBlob(String name, Point pt, int rate, long ticks, Map<String, List<PImage>> i_store)
 	{
 		int animation_rate = random_generator.nextInt(BLOB_ANIMATION_MAX - BLOB_ANIMATION_MIN) + BLOB_ANIMATION_MIN;
-		OreBlob blob = new OreBlob(name, pt, animation_rate, rate);
-		//schedule blob
+		OreBlob blob = new OreBlob(name, pt, ImageStore.getImages(i_store, "blob"), animation_rate, rate);
+		blob.scheduleBlob(this, ticks, i_store);
 		return blob;
 	}
 	
-	public Ore createOre(String name, Point pt)
+	public Ore createOre(String name, Point pt, long ticks, Map<String, List<PImage>> i_store)
 	{
 		int rate = random_generator.nextInt(ORE_CORRUPT_MAX - ORE_CORRUPT_MIN) + ORE_CORRUPT_MIN;
-		Ore ore = new Ore(name, pt, rate);
-		//schedule ore
+		Ore ore = new Ore(name, pt, ImageStore.getImages(i_store, "ore"), rate);
+		ore.scheduleOre(this, ticks, i_store);
 		return ore;
 	}
 	
-	public Quake createQuake(Point pt)
+	public Quake createQuake(Point pt, long ticks, Map<String, List<PImage>> i_store)
 	{
-		Quake quake = new Quake("quake", pt, QUAKE_ANIMATION_RATE);
-		//schedule quake
+		Quake quake = new Quake("quake", pt, ImageStore.getImages(i_store, "quake"), QUAKE_ANIMATION_RATE);
+		quake.scheduleQuake(this, ticks);
 		return quake;
 	}
 	
-	public Vein createVein(String name, Point pt)
+	public Vein createVein(String name, Point pt, long ticks, Map<String, List<PImage>> i_store)
 	{
 		int rate = random_generator.nextInt(VEIN_RATE_MAX - VEIN_RATE_MIN) + VEIN_RATE_MIN;
-		Vein vein = new Vein("vein" + name, pt, rate);
+		Vein vein = new Vein("vein" + name, pt, ImageStore.getImages(i_store, "vein"), rate);
 		return vein;
 	}
 }

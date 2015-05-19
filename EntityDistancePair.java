@@ -1,15 +1,16 @@
+
 public class EntityDistancePair
 {
-	private Entity entity;
+	private Actionable entity;
 	private double distance;
 	
-	public EntityDistancePair(Entity entity, double distance)
+	public EntityDistancePair(Actionable entity, double distance)
 	{
 		this.entity = entity;
 		this.distance = distance;
 	}
 	
-	public Entity getEntity()
+	public Actionable getEntity()
 	{
 		return this.entity;
 	}

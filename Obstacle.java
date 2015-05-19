@@ -1,8 +1,11 @@
+import java.util.List;
+import processing.core.*;
+
 public class Obstacle extends Entity
 {
-	public Obstacle(String name, Point position)
+	public Obstacle(String name, Point position, List<PImage> imgs)
 	{
-		super(name, position);
+		super(name, position, imgs);
 	}
 	
 	public String entityString()

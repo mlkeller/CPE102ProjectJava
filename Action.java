@@ -1,4 +1,7 @@
-public class Action
+import java.util.List;
+
+
+public interface Action
 {
-	//this is a placeholder class
+	List<Point> execute(long ticks);
 }
