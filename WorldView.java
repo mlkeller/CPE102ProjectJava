@@ -69,10 +69,7 @@ public class WorldView
 	
 	public Point viewportToWorld(Point pt)
 	{
-		//System.out.println("ahax" + pt.getX() + " " + this.viewport.getLeft());
-		//System.out.println("ahay" + pt.getY() + " " + this.viewport.getTop());
 		Point rm_pt = new Point(pt.getX() + this.viewport.getLeft(), pt.getY() + this.viewport.getTop());
-		//System.out.println("oho" + rm_pt.getX() + " " + rm_pt.getY());
 		return rm_pt;
 	}
 	
@@ -80,7 +77,8 @@ public class WorldView
 	{
 		return new Point(pt.getX() - this.viewport.getLeft(), pt.getY() - this.viewport.getTop());
 	}
-	
+
+	/*
 	public Rectangle createShiftedViewport(int deltax, int deltay, int num_rows, int num_cols)
 	{
 		int new_x = this.clamp(this.viewport.getLeft() + deltax, 0, num_cols - this.viewport.getWidth());
@@ -92,7 +90,7 @@ public class WorldView
 		int new_y = this.clamp(this.viewport.getTop() + deltay, 0, num_rows - this.viewport.getHeight());
 		System.out.println("y " + new_y);
 		return new Rectangle(new_x, new_y, this.viewport.getWidth(), this.viewport.getHeight());
-	}
+	}*/
 	
 	public void updateView(int deltax, int deltay)
 	{

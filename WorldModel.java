@@ -181,6 +181,7 @@ public class WorldModel
 		while ((next != null) && (next.getTime() < ticks))
 		{
 			this.action_queue.pop();
+			System.out.println(next.getTime() + " " + ticks + " " + next.getAction());
 			next.getAction().execute(ticks);
 			next = this.action_queue.head();
 		}
@@ -241,10 +242,10 @@ public class WorldModel
 	
 	public Point findOpenAround(Point pt, int distance)
 	{
-		Point new_pt = new Point(pt.getX(), pt.getY());  //ask if I can get rid of the second part
-		for (int dy = -distance; dy <= distance; distance++)
+		Point new_pt = new Point(pt.getX(), pt.getY());
+		for (int dy = -distance; dy <= distance; dy++)
 		{
-			for (int dx = -distance; dx <= distance; distance++)
+			for (int dx = -distance; dx <= distance; dx++)
 			{
 				new_pt.setX(pt.getX() + dx);
 				new_pt.setY(pt.getY() + dy);

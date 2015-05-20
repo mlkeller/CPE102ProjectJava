@@ -53,17 +53,19 @@ public class Drawer extends PApplet
 	
 	public void draw()
 	{
-		//System.out.println(world.getActionQueue().getSize());
+		System.out.println(world.getActionQueue().getSize());
 		long time = System.currentTimeMillis();
 		//System.out.println(time);
 		
+		System.out.println(time);
+		System.out.println(next_time);
+		System.out.println("-");
 		if (time >= next_time)
 		{
 			world.updateOnTime(time);
 			//draw background
 			for (int y = 0; y < view.getViewport().getHeight(); y++)
 			{
-				System.out.println("viewportheight: " + view.getViewport().getHeight());
 				for (int x = 0; x < view.getViewport().getWidth(); x++)
 				{
 					//Point w_pt = view.viewportToWorld(new Point(x, y));
@@ -72,7 +74,6 @@ public class Drawer extends PApplet
 										   y + view.getViewport().getTop());
 					PImage img = world.getBackgroundImage(w_pt);
 					image(img, x*view.getTileWidth(), y*view.getTileHeight());
-					System.out.println("here");
 				}
 			}
 			
