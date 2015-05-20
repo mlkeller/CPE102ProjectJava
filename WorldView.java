@@ -101,10 +101,4 @@ public class WorldView
 									  this.viewport.getWidth(),
 									  this.viewport.getHeight());
 	}
-	/*public void updateView()
-	{
-		int deltax = 0;
-		int deltay = 0;
-		this.viewport = this.createShiftedViewport(deltax, deltay, this.num_rows, this.num_cols);
-	}*/
 }

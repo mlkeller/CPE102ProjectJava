@@ -20,6 +20,7 @@ public class Drawer extends PApplet
 	public static final String IMAGE_LIST_FILE_NAME = "imagelist";
 	public static final String WORLD_FILE = "gaia.sav";
 	public static final String DEFAULT_IMAGE_NAME = "background_default";
+	private static final int COLOR_MASK = 0xffffff;
 
 	long next_time;
 	
@@ -119,4 +120,21 @@ public class Drawer extends PApplet
 
 		}
 	}
+	
+	public static PImage setAlpha(PImage img, int maskColor, int alpha)
+	   {
+	      int alphaValue = alpha << 24;
+	      int nonAlpha = maskColor & COLOR_MASK;
+	      img.format = PApplet.ARGB;
+	      img.loadPixels();
+	      for (int i = 0; i < img.pixels.length; i++)
+	      {
+	         if ((img.pixels[i] & COLOR_MASK) == nonAlpha)
+	         {
+	            img.pixels[i] = alphaValue | nonAlpha;
+	         }
+	      }
+	      img.updatePixels();
+	      return img;
+	   }
 }

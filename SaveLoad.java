@@ -122,7 +122,7 @@ public abstract class SaveLoad
 			MinerNotFull new_miner = createMiner(properties, i_store);
 			if (run)
 			{
-				new_miner.scheduleMiner(world, 0, i_store);
+				new_miner.scheduleMiner(world, System.currentTimeMillis(), i_store);
 			}
 			return new_miner;
 		}
@@ -131,7 +131,7 @@ public abstract class SaveLoad
 			Vein new_vein = createVein(properties, i_store);
 			if (run)
 			{
-				new_vein.scheduleVein(world, 0, i_store);
+				new_vein.scheduleVein(world, System.currentTimeMillis(), i_store);
 			}
 			return new_vein;
 		}
@@ -140,7 +140,7 @@ public abstract class SaveLoad
 			Ore new_ore = createOre(properties, i_store);
 			if (run)
 			{
-				new_ore.scheduleOre(world, 0, i_store);
+				new_ore.scheduleOre(world, System.currentTimeMillis(), i_store);
 			}
 			return new_ore;
 		}

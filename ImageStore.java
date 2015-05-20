@@ -58,6 +58,7 @@ public abstract class ImageStore
 				int g = Integer.parseInt(attrs[3]);
 				int b = Integer.parseInt(attrs[4]);
 				int a = Integer.parseInt(attrs[5]);
+				img = Drawer.setAlpha(img, papp.color(r, g, b), a);
 				//FIND JAVA EQUIVALENT
 			}
 		}
